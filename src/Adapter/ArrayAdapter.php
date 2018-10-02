@@ -44,8 +44,14 @@ class ArrayAdapter implements AdapterInterface
     public function getData(DataTableState $state): ResultSetInterface
     {
         $length = $state->getLength();
-        $page = $length > 0 ? array_slice($this->data, $state->getStart(), $state->getLength()) : $this->data;
         $map = [];
+
+        $filteredData = $this->filterData($this->data, $state);
+
+        $this->sortData($filteredData, $state);
+
+        $page = $length > 0 ? array_slice($filteredData, $state->getStart(), $state->getLength()) : $this->data;
+
         foreach ($state->getDataTable()->getColumns() as $column) {
             unset($propertyPath);
             if (empty($propertyPath = $column->getPropertyPath()) && !empty($field = $column->getField() ?? $column->getName())) {
@@ -58,7 +64,56 @@ class ArrayAdapter implements AdapterInterface
 
         $data = iterator_to_array($this->processData($state, $page, $map));
 
-        return new ArrayResultSet($data, count($this->data), count($data));
+        return new ArrayResultSet($data, count($this->data), count($filteredData));
+    }
+
+    protected function filterData($data, $state)
+    {
+        $filteredData = [];
+        $searchColumns = $state->getSearchColumns();
+        foreach ($this->data as $key => $row) {
+            $ok = true;
+            foreach ($row as $colName => $colValue) {
+                if (isset($searchColumns[$colName]['search']) && ! empty($filterString = $searchColumns[$colName]['search'])) {
+                    if (! preg_match("/$filterString/", (string)$colValue)) {
+                        $ok = false;
+                        break;
+                    }
+                }
+            }
+            if ($ok) {
+                $filteredData[] = $row;
+            }
+        }
+        return $filteredData;
+    }
+
+    protected function sortData(&$data, $state)
+    {
+        foreach ($state->getOrderBy() as $item) {
+            $column = $item[0];
+            $colName = $column->getName();
+            $order = $item[1];
+            usort($data, function($row1, $row2) use ($colName, $order) {
+                $val1 = $row1[$colName];
+                $val2 = $row2[$colName];
+                if (is_numeric($val1) && is_numeric($val2)) {
+                    if ($order == 'desc') {
+                        return $val1 < $val2;
+                    } else {
+                        return $val1 > $val2;
+                    }
+                } else if (is_string($val1) && is_string($val2)) {
+                    if ($order == 'desc') {
+                        $val1 = strtolower($val1);
+                        $val2 = strtolower($val2);
+                        return strcmp($val1, $val2) > 0;
+                    } else {
+                        return strcmp($val1, $val2) < 0;
+                    }
+                }
+            });
+        }
     }
 
     /**
