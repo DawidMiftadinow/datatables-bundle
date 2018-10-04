@@ -46,9 +46,17 @@ class SearchCriteriaProvider implements QueryBuilderProcessorInterface
             $search = $searchInfo['search'];
 
             if (!empty($search) && null !== ($filter = $column->getFilter())) {
+                $search = $filter->getValue($search);
+
                 if (strtoupper($filter->getOperator()) === 'LIKE') {
                     $expr = $queryBuilder->expr();
                     $queryBuilder->andWhere($expr->like($column->getField(), $expr->literal("%{$search}%")));
+                } else if (strtoupper($filter->getOperator()) === 'BETWEEN') {
+                    $field = $column->getField();
+                    $queryBuilder->andWhere("$field BETWEEN :left AND :right")
+                        ->setParameter('left', $search[0])
+                        ->setParameter('right', $search[1])
+                    ;
                 } else {
                     $queryBuilder->andWhere(new Comparison($column->getField(), $filter->getOperator(), $search));
                 }

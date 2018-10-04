@@ -82,4 +82,13 @@ abstract class AbstractFilter
      * @return bool
      */
     abstract public function isValidValue($value): bool;
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    public function getValue($value)
+    {
+        return $value;
+    }
 }

@@ -66,4 +66,12 @@ class ChoiceFilter extends AbstractFilter
     {
         return array_key_exists($value, $this->choices);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getValue($key)
+    {
+        return $this->getChoices()[$key];
+    }
 }
