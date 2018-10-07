@@ -75,9 +75,23 @@ class ArrayAdapter implements AdapterInterface
             $ok = true;
             foreach ($row as $colName => $colValue) {
                 if (isset($searchColumns[$colName]['search']) && ! empty($filterString = $searchColumns[$colName]['search'])) {
-                    if (! preg_match("/$filterString/i", (string)$colValue)) {
-                        $ok = false;
-                        break;
+                    $column = $searchColumns[$colName]['column'];
+                    $filter = $column->getFilter();
+
+                    $colValue = $column->transform($colValue);
+
+                    if (strtoupper($filter->getOperator()) === 'BETWEEN') {
+                        $colValue = (int) $colValue;
+                        $limits = $filter->getChoices()[$filterString];
+                        if (! ($colValue >= $limits[0] && $colValue <= $limits[1])) {
+                            $ok = false;
+                            break;
+                        }
+                    } else {
+                        if (! preg_match("/$filterString/i", (string)$colValue)) {
+                            $ok = false;
+                            break;
+                        }
                     }
                 }
             }
