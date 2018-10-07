@@ -75,7 +75,7 @@ class ArrayAdapter implements AdapterInterface
             $ok = true;
             foreach ($row as $colName => $colValue) {
                 if (isset($searchColumns[$colName]['search']) && ! empty($filterString = $searchColumns[$colName]['search'])) {
-                    if (! preg_match("/$filterString/", (string)$colValue)) {
+                    if (! preg_match("/$filterString/i", (string)$colValue)) {
                         $ok = false;
                         break;
                     }
