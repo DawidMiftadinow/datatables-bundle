@@ -45,7 +45,7 @@ class SearchCriteriaProvider implements QueryBuilderProcessorInterface
             $column = $searchInfo['column'];
             $search = $searchInfo['search'];
 
-            if (!empty($search) && null !== ($filter = $column->getFilter()) && $filter->getOperator()) {
+            if (null != $search && null !== ($filter = $column->getFilter()) && $filter->getOperator()) {
                 $search = $filter->getValue($search);
 
                 if (strtoupper($filter->getOperator()) === 'LIKE') {
@@ -58,7 +58,7 @@ class SearchCriteriaProvider implements QueryBuilderProcessorInterface
                         ->setParameter('right', $search[1])
                     ;
                 } else {
-                    $queryBuilder->andWhere(new Comparison($column->getField(), $filter->getOperator(), $search));
+                    $queryBuilder->andWhere(new Comparison($column->getField(), $filter->getOperator(), "'$search'"));
                 }
             }
         }
@@ -70,7 +70,7 @@ class SearchCriteriaProvider implements QueryBuilderProcessorInterface
      */
     private function processGlobalSearch(QueryBuilder $queryBuilder, DataTableState $state)
     {
-        if (!empty($globalSearch = $state->getGlobalSearch())) {
+        if (null != ($globalSearch = $state->getGlobalSearch())) {
             $expr = $queryBuilder->expr();
             $comparisons = $expr->orX();
             foreach ($state->getDataTable()->getColumns() as $column) {
