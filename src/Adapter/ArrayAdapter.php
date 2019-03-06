@@ -50,7 +50,7 @@ class ArrayAdapter implements AdapterInterface
 
         $this->sortData($filteredData, $state);
 
-        $page = $length > 0 ? array_slice($filteredData, $state->getStart(), $state->getLength()) : $this->data;
+        $page = $length > 0 ? array_slice($filteredData, $state->getStart(), $state->getLength()) : $filteredData;
 
         foreach ($state->getDataTable()->getColumns() as $column) {
             unset($propertyPath);
