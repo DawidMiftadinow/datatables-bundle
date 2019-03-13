@@ -78,8 +78,6 @@ class ArrayAdapter implements AdapterInterface
                     $column = $searchColumns[$colName]['column'];
                     $filter = $column->getFilter();
 
-                    $colValue = $column->transform($colValue);
-
                     if (strtoupper($filter->getOperator()) === 'BETWEEN') {
                         $colValue = (int) $colValue;
                         $limits = $filter->getChoices()[$filterString];
