@@ -258,6 +258,15 @@ class DataTableState
     }
 
     /**
+     * Removes column
+     * @param AbstractColumn $column
+     */
+    public function removeSearchColumn($column)
+    {
+            unset($this->searchColumns[$column]);
+    }
+
+    /**
      * @param AbstractColumn $column
      * @param string $search
      * @param bool $isRegex
